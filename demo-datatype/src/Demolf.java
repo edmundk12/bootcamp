@@ -53,7 +53,7 @@ public class Demolf {
 
     // Example 8
 
-    int year = 2003;
+    int year = 1900;
     boolean leap1;
     boolean leap2;
 
@@ -110,14 +110,14 @@ public class Demolf {
 
     char c = 'a';
     if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
-      System.out.println(c + "is a vowel");
+      System.out.println(c + " is a vowel");
     } else {
-      System.out.println(c + "is a constant");
+      System.out.println(c + " is a constant");
     }
 
     // Example 12
 
-    String password = "Admin1234567";
+    String password = "Admin@8887";
 
     if ((password.contains("#") || password.contains("!")
         || password.contains("@")

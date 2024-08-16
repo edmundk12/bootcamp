@@ -1,0 +1,9 @@
+{
+  "java.project.sourcePaths": [
+    "demo-method/src",
+    "demo-loop/src",
+    "demo-array/src",
+    "JavaQuest",
+    "demo-class-object/src"
+  ]
+}
