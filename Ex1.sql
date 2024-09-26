@@ -1,0 +1,232 @@
+CREATE DATABASE BOOTCAMP_EXERCISE1;
+
+USE BOOTCAMP_EXERCISE1;
+
+CREATE TABLE LOCATIONS( 
+location_id INT PRIMARY KEY, 
+street_address VARCHAR(25), 
+postal_code VARCHAR(12), 
+city VARCHAR(30), 
+state_province VARCHAR(12), 
+country_id CHAR(2) 
+);
+
+INSERT INTO LOCATIONS 
+VALUES  
+(1000, '1297 Via Cola di Rie', '989', 'Roma', null, 'IT'), 
+(1100, '93091 Calle della Te', '10934', 'Venice', null, 'IT'), 
+(1200, '2017 Shinjuku-ku', '1689', 'Tokyo', 'Tokyo JP', 'JP'), 
+(1400, '2014 Jabberwocky Rd', '26192', 'Southlake', 'Texas', 'US');
+
+CREATE TABLE COUNTRIES( 
+country_id CHAR(2) PRIMARY KEY, 
+country_name VARCHAR(40), 
+region_id INT 
+);
+
+INSERT INTO COUNTRIES 
+VALUES 
+('DE', 'GERMANY', 1), 
+('IT', 'ITALY', 1), 
+('JP', 'JAPAN', 3), 
+('US', 'UNITED STATES', 2);
+
+ALTER TABLE LOCATIONS ADD CONSTRAINT fk_country FOREIGN KEY (country_id) REFERENCES COUNTRIES(country_id);
+
+CREATE TABLE DEPARTMENTS( 
+DEPARTMENT_ID INT PRIMARY KEY, 
+DEPARTMENT_NAME VARCHAR(20), 
+MANAGER_ID INT, 
+LOCATION_ID INT 
+);
+
+INSERT INTO DEPARTMENTS 
+VALUES 
+(10, 'Administration', 200, 1100), 
+(20, 'Marketing', 201, 1200), 
+(30, 'Purchasing', 202, 1400);
+
+ALTER TABLE DEPARTMENTS ADD FOREIGN KEY (LOCATION_ID) REFERENCES LOCATIONS (LOCATION_ID);
+
+CREATE TABLE EMPLOYEES( 
+EMPLOYEE_ID INT PRIMARY KEY, 
+FIRST_NAME VARCHAR(20), 
+LAST_NAME VARCHAR(25), 
+EMAIL VARCHAR(25), 
+PHONE_NUMBER VARCHAR(20), 
+HIRE_DATE DATE, 
+JOB_ID VARCHAR(10), 
+SALARY INT, 
+COMMISSION_PCT INT, 
+MANAGER_ID INT, 
+DEPARTMENT_ID INT 
+);
+
+INSERT INTO EMPLOYEES 
+VALUES 
+(100, 'Steven', 'King', 'SKING', '515-1234567', '1987-06-17', 'ST_CLERK', 24000, 0, 109, 10), 
+(101, 'Neena', 'Kochhar', 'NKOCHHAR', '515-1234568', '1987-06-18', 'MK_REP', 17000, 0, 103, 20), 
+(102, 'Lex', 'De Haan', 'LDEHAAN', '515-1234569', '1987-06-19', 'IT_PROG', 17000, 0, 108, 30), 
+(103, 'Alexander', 'Hunold', 'AHUNOLD', '590-4234567', '1987-06-20', 'MK_REP', 9000, 0, 105, 20);
+
+ALTER TABLE EMPLOYEES ADD FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENTS (DEPARTMENT_ID);
+
+CREATE TABLE JOB_HISTORY(
+EMPLOYEE_ID INT,
+START_DATE DATE,
+END_DATE DATE,
+JOB_ID VARCHAR(20),
+DEPARTMENT_ID INT,
+PRIMARY KEY (EMPLOYEE_ID, START_DATE)
+);
+
+INSERT INTO JOB_HISTORY
+VALUES
+(102, '1993-01-13', '1998-07-24', 'IT_PROG', 20),
+(101, '1989-09-21', '1993-10-27', 'MK_REP', 10),
+(101, '1993-10-28', '1997-03-15', 'MK_REP', 30),
+(100, '1996-02-17', '1999-12-19', 'ST_CLERK', 30),
+(103, '1998-03-24', '1999-12-31', 'MK_REP', 20);
+
+ALTER TABLE JOB_HISTORY ADD FOREIGN KEY (DEPARTMENT_ID) REFERENCES DEPARTMENTS (DEPARTMENT_ID);
+
+CREATE TABLE JOBS(
+JOB_ID VARCHAR(10) PRIMARY KEY,
+JOB_TITLE VARCHAR(25),
+MIN_SALARY INT,
+MAX_SALARY INT
+);
+
+INSERT INTO JOBS (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+SELECT JOB_ID, 
+       CASE 
+           WHEN JOB_ID = 'ST_CLERK' THEN 'Stock Clerk'
+           WHEN JOB_ID = 'MK_REP' THEN 'Marketing Representative'
+           WHEN JOB_ID = 'IT_PROG' THEN 'IT Programmer'
+       END AS JOB_TITLE,
+       MIN(SALARY) AS MIN_SALARY,
+       MAX(SALARY) AS MAX_SALARY
+FROM EMPLOYEES
+GROUP BY JOB_ID;
+
+ALTER TABLE EMPLOYEES ADD FOREIGN KEY (JOB_ID) REFERENCES JOBS (JOB_ID);
+
+ALTER TABLE JOB_HISTORY ADD FOREIGN KEY (JOB_ID) REFERENCES JOBS (JOB_ID);
+
+ALTER TABLE JOB_HISTORY ADD FOREIGN KEY (EMPLOYEE_ID) REFERENCES EMPLOYEES (EMPLOYEE_ID);
+
+CREATE TABLE REGIONS (
+REGION_ID INT PRIMARY KEY,
+REGION_NAME VARCHAR(25)
+);
+
+INSERT INTO REGIONS
+VALUES
+(1, 'Europe'),
+(2, 'North America'),
+(3, 'Asia');
+
+ALTER TABLE COUNTRIES ADD FOREIGN KEY (REGION_ID) REFERENCES REGIONS (REGION_ID);
+
+-- 3
+SELECT 
+L.location_id,
+L.street_address,
+L.city,
+L.state_province,
+C.country_name
+FROM LOCATIONS L
+JOIN COUNTRIES C ON L.country_id = C.country_id;
+
+-- 4
+SELECT
+first_name,
+last_name,
+department_id
+from employees;
+
+-- 5
+SELECT 
+E.first_name,
+E.last_name,
+E.job_id,
+D.department_id
+FROM EMPLOYEES E
+JOIN DEPARTMENTS D ON E.department_id = D.department_id
+JOIN LOCATIONS L ON D.location_id = L.location_ID
+JOIN COUNTRIES C on L.country_id = C.country_id
+WHERE
+C.country_id = 'JP';
+
+-- 6
+INSERT INTO EMPLOYEES (employee_id, first_name, last_name)
+VALUES
+(105, 'John', 'Chan'),
+(108, 'Tim', 'Wong'),
+(109, 'May', 'Lee');
+
+SELECT
+E1.employee_id as employee_id,
+E1.last_name as employee_last_name,
+E2.employee_id AS manager_id,
+E2.last_name AS manager_last_name
+FROM EMPLOYEES E1
+JOIN EMPLOYEES E2 ON E1.manager_id = E2.employee_id;
+
+-- 7
+
+SELECT
+first_name,
+last_name,
+hire_date
+FROM EMPLOYEES
+WHERE hire_date > 
+(SELECT hire_date
+FROM EMPLOYEES
+WHERE first_name = 'Lex' AND last_name = 'De Haan'
+);
+
+-- 8
+
+SELECT
+D.department_name AS DEPARTMENT_NAME,
+COUNT(E.employee_id) AS EMPLOYEE_COUNT
+FROM
+DEPARTMENTS D
+JOIN EMPLOYEES E ON D.department_id = E.department_id
+GROUP BY department_name;
+
+-- 9
+
+SELECT
+E.employee_id as EMPLOYEE_ID,
+JH.job_id as JOB_TITLE,
+DATEDIFF(JH.end_date , JH.start_date) AS NO_OF_DAYS
+FROM EMPLOYEES E
+JOIN JOB_HISTORY JH ON E.employee_id = JH.employee_id
+WHERE E.department_id = 30 OR JH.department_id = 30;
+
+-- 10
+
+-- 11
+
+SELECT
+D.department_name as DEPARTMENT_NAME,
+AVG(E.salary) AS AVG_SALARY
+FROM DEPARTMENTS D
+JOIN EMPLOYEES E ON D.department_id = E.department_id
+GROUP BY department_name;
+
+-- 12
+
+
+
+
+
+
+
+
+
+
+
+
